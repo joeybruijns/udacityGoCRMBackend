@@ -7,7 +7,8 @@ Users will be able to make HTTP requests to the server to perform basic CRUD ope
 
 
 ### Launching the Project
-
+To launch the project, run the following command from the root directory of the project:
+`go run main.go`
 
 ### Basic Usage
 This is an overview of the available operations that are supported, together with the available endpoints:
