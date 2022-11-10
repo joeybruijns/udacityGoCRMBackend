@@ -2,6 +2,7 @@ package database
 
 import "udacityGoCRMBackend/api/database/models"
 
+// SeedCustomerData is a basic function for adding dummy data to the mock database of the program.
 func SeedCustomerData() {
 	c1 := models.Customer{
 		Id:        1,

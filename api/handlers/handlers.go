@@ -12,19 +12,13 @@ import (
 	"udacityGoCRMBackend/api/database/models"
 )
 
-// TODO: Add Docstrings to all functions/helpers and optional comments to explain code
-// TODO: Refactor handlers: split up and maybe add helper functions
-// TODO: Finish README file content
-// TODO: Rename Project
-// TODO: Add project to git
-
-// TODO: Add new endpoint for batch updating
-// TODO: Replace mock database with real Database
-
+// Home serves a static html home page.
 func Home(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "api/web/index.html")
 }
 
+// GetCustomer searches the database for a user with a given ID in the HTTP GET request.
+// It returns a 200 OK status if the customer was found.
 func GetCustomer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -43,47 +37,54 @@ func GetCustomer(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Println("Getting customer data with ID", matchedCustomer.Id)
 		err := json.NewEncoder(w).Encode(matchedCustomer)
-		handleError(err)
+		handleBasicError(err)
 	} else {
 		customerNotExists(w)
 	}
 }
 
+// GetCustomers returns all the customers from the database.
+// It gives a 200 OK status if the request was made successfully.
 func GetCustomers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusOK)
 	fmt.Println("Getting all customer data")
+
 	err := json.NewEncoder(w).Encode(database.CustomerDb)
-	handleError(err)
+	handleBasicError(err)
 }
 
+// AddCustomer handles an HTTP POST request for creating a new customer in the database.
+// It gives back a 201 Created status if the customer is created successfully,
+// and a 409 Conflict status if a user with the provided ID already exists.
 func AddCustomer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
 	var newCustomer models.Customer
-	customerIdExists := false
+	customerFound := false
 
 	reqBody, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(reqBody, &newCustomer)
-	handleError(err)
+	handleBasicError(err)
 
 	for _, customer := range database.CustomerDb {
 		if customer.Id == newCustomer.Id {
-			customerIdExists = true
+			customerFound = true
 		}
 	}
 
-	if customerIdExists {
+	if customerFound {
 		w.WriteHeader(http.StatusConflict)
 		_, err = fmt.Fprintf(w, "User with this ID already exists..\n")
-		handleError(err)
+		handleBasicError(err)
 	} else {
 		w.WriteHeader(http.StatusCreated)
 		fmt.Println("Created new customer with ID", newCustomer.Id)
 		database.CustomerDb = append(database.CustomerDb, newCustomer)
 
 		err = json.NewEncoder(w).Encode(database.CustomerDb)
-		handleError(err)
+		handleBasicError(err)
 	}
 }
 
@@ -105,9 +106,9 @@ func UpdateCustomer(w http.ResponseWriter, r *http.Request) {
 	if customerFound {
 		reqBody, _ := io.ReadAll(r.Body)
 		err := json.Unmarshal(reqBody, &updatedCustomer)
-		handleError(err)
+		handleBasicError(err)
 
-		//TODO: Refactor update logic
+		//Overwrite data of existing customer except for the ID value
 		var existingCustomer *models.Customer = &database.CustomerDb[customerIndex]
 		existingCustomer.Name = updatedCustomer.Name
 		existingCustomer.Role = updatedCustomer.Role
@@ -119,7 +120,7 @@ func UpdateCustomer(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Updated customer with ID", existingCustomer.Id)
 
 		err = json.NewEncoder(w).Encode(database.CustomerDb)
-		handleError(err)
+		handleBasicError(err)
 	} else {
 		customerNotExists(w)
 	}
@@ -145,7 +146,7 @@ func DeleteCustomer(w http.ResponseWriter, r *http.Request) {
 		database.CustomerDb = append(database.CustomerDb[:customerIndex], database.CustomerDb[customerIndex+1:]...)
 
 		err := json.NewEncoder(w).Encode(database.CustomerDb)
-		handleError(err)
+		handleBasicError(err)
 	} else {
 		customerNotExists(w)
 	}
