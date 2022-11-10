@@ -12,6 +12,11 @@ import (
 	"udacityGoCRMBackend/api/database/models"
 )
 
+// FUTURE IMPROVEMENT IDEAS:
+// TODO: Create an additional endpoint that updates customer values in a batch (i.e., rather than for a single customer).
+// TODO: Upgrade the mock database to a real database (e.g., PostgreSQL).
+// TODO: Deploy the API to the web for learning purposes.
+
 // Home serves a static html home page.
 func Home(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "api/web/index.html")
